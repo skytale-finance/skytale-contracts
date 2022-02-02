@@ -809,7 +809,7 @@ contract MultiVesting is Ownable
         uint256 startedAt; // Timestamp in seconds
         uint256 totalAmount; // Vested amount PMA in PMA
         uint256 releasedAmount; // Amount that beneficiary withdraw
-        uint256 months;     //no of months vesting should be done 
+        uint256 months;     //no of months vesting should be done
         uint256 startAmount; //start amount to be release at TGE
         uint256 rewardsPerMonth; //rewards per month
     }
@@ -855,20 +855,25 @@ contract MultiVesting is Ownable
 
         require(available >= _amount, "DON_T_HAVE_ENOUGH_PMA");
 
+        uint256 _rewardsPerMonth = 0;
+        if (_months > 0) {
+            _rewardsPerMonth = (_amount - _startAmount).div(_months);
+        }
+
         Vesting memory v = Vesting({
             startedAt : _startedAt,
             totalAmount : _amount,
             releasedAmount : 0,
             startAmount:_startAmount,
             months:_months,
-            rewardsPerMonth:(_amount - _startAmount).div(_months)
+            rewardsPerMonth: _rewardsPerMonth
             });
 
         vestingMap[_beneficiary].push(v);
         totalVestedAmount = totalVestedAmount.add(_amount);
     }
 
-  
+
 
     /// @notice Method that allows a beneficiary to withdraw all their allocated funds.
     function withdrawAllAvailable() external {
@@ -955,6 +960,10 @@ contract MultiVesting is Ownable
 
         uint256 rewardPerMonth = vesting.rewardsPerMonth;
 
+        if (rewardPerMonth == 0) {
+            return 0;
+        }
+
     //  calculate no of months passed
         uint256 monthPassed = _timestamp
             .sub(vesting.startedAt)
@@ -967,8 +976,8 @@ contract MultiVesting is Ownable
             return vesting.totalAmount.sub(alreadyReleased);
         }
         uint256 rewards=  rewardPerMonth.mul(monthPassed);
-        
-        // if months passed greater than 0 
+
+        // if months passed greater than 0
         return  rewards.add(vesting.startAmount).sub(alreadyReleased);
     }
 

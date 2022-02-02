@@ -56,12 +56,10 @@ The Skyatle Smart contracts has a Vesting and Token Contract .The tokens will be
 ## STEPS TO RUN TEST CASES
  
  - Change the ganache port from truffle-config.js
- - npm i 
- - truffle test
+ - run
 
-
-
-
-   
-   
-
+```shell
+ganache
+npm i
+npx  truffle test
+```
