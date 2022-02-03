@@ -36,6 +36,13 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
       assert(x.toNumber() === 1);
     });
 
+    it('Allows to add vesting to owner with 0 months', async function () {
+      const args = [user1, toWei('10', 'ether'), toWei('2', 'ether'), 0];
+      await this.multiVesting.addVestingFromNow(...args, { from: owner });
+      const x = await this.multiVesting.getNextVestingId(user1);
+      assert(x.toNumber() === 1);
+    });
+
     it("Doesn't allow add vesting to owner with a past timestamp", async function () {
       const timestampInThePast = Math.floor(Date.now() / 1000) - 20000;
       const args = [
