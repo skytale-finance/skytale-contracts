@@ -302,8 +302,10 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
 
     it('Returns the vesting map', async function () {
       const history = await this.multiVesting.getVestingHistory.call({ from: owner});
-      console.log("vesting: "+JSON.stringify(history, null, 2));
       assert.equal(history.length, 3);
+      assert.equal(history[0][0], "0x04ABed517444942cb1Ab0a8C3007A3b33cE355c6");
+      assert.equal(history[1][0], "0x04ABed517444942cb1Ab0a8C3007A3b33cE355c6");
+      assert.equal(history[2][0], "0x04ABed517444942cb1Ab0a8C3007A3b33cE355c6");
     });
 
 
