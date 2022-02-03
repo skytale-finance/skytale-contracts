@@ -300,6 +300,13 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
       });
     });
 
+    it('Returns the vesting map', async function () {
+      const history = await this.multiVesting.getVestingHistory.call({ from: owner});
+      console.log("vesting: "+JSON.stringify(history, null, 2));
+      assert.equal(history.length, 3);
+    });
+
+
     it('Returns correct aggregated available amount for beneficiary with several allocations', async function () {
       await timeTravel(secondsIn30Days * 4);
       const total = await this.multiVesting.getAvailableAmountAggregated(

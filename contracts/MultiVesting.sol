@@ -806,6 +806,7 @@ contract MultiVesting is Ownable
     using SafeERC20 for IERC20;
 
     struct Vesting {
+        address beneficiary;
         uint256 startedAt; // Timestamp in seconds
         uint256 totalAmount; // Vested amount PMA in PMA
         uint256 releasedAmount; // Amount that beneficiary withdraw
@@ -823,6 +824,9 @@ contract MultiVesting is Ownable
     // Beneficiary address -> Array of Vesting params
     mapping(address => Vesting[]) public vestingMap;
 
+    // Vesting History
+    Vesting[] public vestingHistory;
+
     // ===============================================================================================================
     // Constructor
     // ===============================================================================================================
@@ -830,6 +834,16 @@ contract MultiVesting is Ownable
     /// @param _token - ERC20 token address.
     constructor(IERC20 _token)  {
         token = _token;
+    }
+
+    /// @notice returns the vesting history
+    function getVestingHistory() public view returns (Vesting[] memory) {
+        uint256 len = vestingHistory.length;
+        Vesting[] memory ret = new Vesting[](len);
+        for (uint i = 0; i < len; i++) {
+            ret[i] = vestingHistory[i];
+        }
+        return ret;
     }
 
     /// @notice Creates vesting for beneficiary, with a given amount of tokens to allocate.
@@ -861,6 +875,7 @@ contract MultiVesting is Ownable
         }
 
         Vesting memory v = Vesting({
+            beneficiary: _beneficiary,
             startedAt : _startedAt,
             totalAmount : _amount,
             releasedAmount : 0,
@@ -869,6 +884,7 @@ contract MultiVesting is Ownable
             rewardsPerMonth: _rewardsPerMonth
             });
 
+        vestingHistory.push(v);
         vestingMap[_beneficiary].push(v);
         totalVestedAmount = totalVestedAmount.add(_amount);
     }
