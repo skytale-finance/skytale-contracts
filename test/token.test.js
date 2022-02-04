@@ -284,6 +284,21 @@ contract('Token Contract', ([owner, user1, user2, user3, user4]) => {
       assert(+fromWei(newSupply) === estimatedSupply);
     });
 
+    it('Should not Allow MINTER ROLE to mint above max', async function () {
+      await instance.grantRole(MINTER_ROLE, user1, {
+        from: owner,
+      });
+      const currentSupply = await instance.totalSupply();
+      const amount = currentSupply + 100000000;
+
+      await assert.rejects(
+        async () => {
+          await instance.mint(user1, toWei(amount, 'ether'), { from: user1 });
+        },
+        { reason: 'Total Supply can\'t be greater than max supply' }
+      );
+    });
+
     it('Allows to add BURNER ROLE and  burn the tokens', async function () {
       await instance.grantRole(BURNER_ROLE, user1, {
         from: owner,
