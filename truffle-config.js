@@ -20,8 +20,8 @@
 
  const HDWalletProvider = require('@truffle/hdwallet-provider');
 
- 
- 
+
+
  module.exports = {
    /**
     * Networks define how you connect to your ethereum client and let you set the
@@ -32,7 +32,7 @@
     *
     * $ truffle test --network <network-name>
     */
- 
+
    networks: {
      // Useful for testing. The `development` name is special - truffle uses it by default
      // if it's defined here and no other network is specified at the command line.
@@ -79,16 +79,16 @@
     //    skipDryRun: true,
     //  },
    },
- 
+
    // Set default mocha options here, use special reporters etc.
    mocha: {
      // timeout: 100000
    },
- 
+
    // Configure your compilers
    compilers: {
      solc: {
-       version: "0.8.10",    // Fetch exact version from solc-bin (default: truffle's version)
+       version: "0.8.0",    // Fetch exact version from solc-bin (default: truffle's version)
        // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
        // settings: {          // See the solidity docs for advice about optimization and evmVersion
        //  optimizer: {
@@ -99,9 +99,9 @@
        // }
      }
    },
- 
+
    plugins: ["solidity-coverage"]
- 
+
    // Truffle DB is currently disabled by default; to enable it, change enabled:
    // false to enabled: true. The default storage location can also be
    // overridden by specifying the adapter settings, as shown in the commented code below.
@@ -123,4 +123,3 @@
    // }
    // }
  };
- 

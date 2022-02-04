@@ -805,6 +805,12 @@ contract MultiVesting is Ownable
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
+    event AddVesting(address _beneficiary, uint256 _amount, uint256 _startedAt,uint256 _startAmount,uint256 _months);
+
+    event WithdrawAllAvailable();
+
+    event WithdrawUnallocatedFunds(address _receiver);
+
     struct Vesting {
         address beneficiary;
         uint256 startedAt; // Timestamp in seconds
@@ -887,6 +893,8 @@ contract MultiVesting is Ownable
         vestingHistory.push(v);
         vestingMap[_beneficiary].push(v);
         totalVestedAmount = totalVestedAmount.add(_amount);
+
+        emit AddVesting(_beneficiary, _amount, _startedAt, _startAmount, _months);
     }
 
 
@@ -908,8 +916,11 @@ contract MultiVesting is Ownable
 
         // Increase released amount
         totalReleasedAmount = totalReleasedAmount.add(aggregatedAmount);
-       // Transfer
+        // Transfer
         token.safeTransfer(msg.sender, aggregatedAmount);
+
+        //emit event
+        emit WithdrawAllAvailable();
     }
 
     /// @notice Method that allows the owner to withdraw unallocated funds to a specific address
@@ -918,6 +929,7 @@ contract MultiVesting is Ownable
         uint256 amount = getUnallocatedFundsAmount();
         require(amount > 0, "DON_T_HAVE_UNALLOCATED_TOKENS");
         token.safeTransfer(_receiver, amount);
+        emit WithdrawUnallocatedFunds(_receiver);
     }
 
     // ===============================================================================================================
@@ -975,9 +987,13 @@ contract MultiVesting is Ownable
         }
 
         uint256 rewardPerMonth = vesting.rewardsPerMonth;
+        uint256 alreadyReleased = vesting.releasedAmount;
 
         if (rewardPerMonth == 0) {
-            return 0;
+            if (alreadyReleased == vesting.totalAmount) {
+                return 0;
+            }
+            return vesting.totalAmount.sub(alreadyReleased);
         }
 
     //  calculate no of months passed
@@ -985,7 +1001,6 @@ contract MultiVesting is Ownable
             .sub(vesting.startedAt)
             .div(30 days); // We say that 1 month is always 30 days
 
-        uint256 alreadyReleased = vesting.releasedAmount;
 
         // if months passed greater than vesting months
         if (monthPassed >= vesting.months ) {

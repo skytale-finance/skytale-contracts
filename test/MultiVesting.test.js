@@ -136,6 +136,19 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
         const args = [user1, toWei('10', 'ether'), toWei('2', 'ether'), 4];
         await this.multiVesting.addVestingFromNow(...args, { from: owner });
       }
+      {
+        const args = [user2, toWei('10', 'ether'), toWei('10', 'ether'), 0];
+        await this.multiVesting.addVestingFromNow(...args, { from: owner });
+      }
+    });
+
+    it('Allows to withdraw TGE amount with 0 months vesting', async function () {
+      // await timeTravel(secondsIn30Days)
+      const vestingId = '0';
+      await this.multiVesting.withdrawAllAvailable({ from: user2 });
+      const balanceBn = await this.erc20Token.balanceOf(user2);
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 10); // TGE AMOUNT
     });
 
     it('Allows to withdraw TGE amount', async function () {
