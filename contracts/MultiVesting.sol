@@ -875,19 +875,14 @@ contract MultiVesting is Ownable
 
         require(available >= _amount, "DON_T_HAVE_ENOUGH_PMA");
 
-        uint256 _rewardsPerMonth = 0;
-        if (_months > 0) {
-            _rewardsPerMonth = (_amount - _startAmount).div(_months);
-        }
-
-        Vesting memory v = Vesting({
+       Vesting memory v = Vesting({
             beneficiary: _beneficiary,
             startedAt : _startedAt,
             totalAmount : _amount,
             releasedAmount : 0,
-            startAmount:_startAmount,
+            startAmount:_months > 0 ? _startAmount :_amount ,
             months:_months,
-            rewardsPerMonth: _rewardsPerMonth
+            rewardsPerMonth: _months > 0 ?(_amount - _startAmount).div(_months): 0
             });
 
         vestingHistory.push(v);
