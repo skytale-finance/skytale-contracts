@@ -140,6 +140,10 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
         const args = [user2, toWei('10', 'ether'), toWei('10', 'ether'), 0];
         await this.multiVesting.addVestingFromNow(...args, { from: owner });
       }
+      {
+        const args = [user3, toWei('10', 'ether'), toWei('1', 'ether'), 0];
+        await this.multiVesting.addVestingFromNow(...args, { from: owner });
+      }
     });
 
     it('Allows to withdraw TGE amount with 0 months vesting', async function () {
@@ -149,6 +153,23 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
       const balanceBn = await this.erc20Token.balanceOf(user2);
       const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
       assert.strictEqual(balanceInEther, 10); // TGE AMOUNT
+    });
+
+    it('Allows to withdraw total amount with 0 months vesting', async function () {
+      // await timeTravel(secondsIn30Days)
+      const vestingId = '0';
+      const availableBalance = await this.multiVesting.getAvailableAmountAggregated(user3);
+      const availableBalanceInEther = fromWei(availableBalance, 'milli') / 1000;
+      assert.strictEqual(availableBalanceInEther, 10); // TGE AMOUNT
+      await this.multiVesting.withdrawAllAvailable({ from: user3 });
+      const balanceBn = await this.erc20Token.balanceOf(user3);
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 10); // TGE AMOUNT
+      await timeTravel(secondsIn30Days);
+      await this.multiVesting.withdrawAllAvailable({ from: user1 });
+      const newBalanceBn = await this.erc20Token.balanceOf(user3);
+      const newBalanceInEther = fromWei(newBalanceBn, 'milli') / 1000;
+      assert.strictEqual(newBalanceInEther, 10); // TGE AMOUNT
     });
 
     it('Allows to withdraw TGE amount', async function () {
@@ -447,6 +468,80 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
       const balanceBn = await this.erc20Token.balanceOf(user1);
       const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
       assert.strictEqual(balanceInEther, 10); // TGE AMOUNT
+    });
+  });
+
+  // consider 1 month =30 days fix
+  describe('Funds unlock test with cliff and 0 months', async function () {
+    beforeEach('Deploy Token and MultiVesting contracts', async function () {
+      const args = ['MockERC20Token', 'TST', 10000000, 100000000, owner];
+      this.erc20Token = await MockERC20Token.new(...args, { from: owner });
+
+      this.multiVesting = await MultiVesting.new(this.erc20Token.address, {
+        from: owner,
+      });
+
+      await this.erc20Token.transfer(
+        this.multiVesting.address,
+        toWei('1000', 'ether'),
+        { from: owner }
+      );
+
+      {
+        const currentTimestamp = await currentBlockTime();
+        const timestamp = await getTimestamp(currentTimestamp, 10);
+        const args = [user1, toWei('10', 'ether'), timestamp, 0, 0];
+        await this.multiVesting.addVesting(...args, { from: owner });
+      }
+      {
+        const currentTimestamp = await currentBlockTime();
+        const timestamp = await getTimestamp(currentTimestamp, 15);
+        const args = [user2, toWei('11', 'ether'), timestamp, toWei('5', 'ether'), 0];
+        await this.multiVesting.addVesting(...args, { from: owner });
+      }
+    });
+
+    it('Returns 0 after 1d for 10d cliff', async function () {
+      await timeTravel(secondsInDay);
+      const balanceBn = await this.multiVesting.getAvailableAmount(user1, '0', {
+        from: user1,
+      });
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 0); // 100% and no more
+    });
+
+    it('Returns 0 after 1d for 15d cliff', async function () {
+      const balanceBn = await this.multiVesting.getAvailableAmount(user2, '0', {
+        from: user2,
+      });
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 0); // 100% and no more
+    });
+
+    it('Returns total amount after 10d for 10d cliff', async function () {
+      await timeTravel(secondsInDay * 10);
+      const balanceBn = await this.multiVesting.getAvailableAmount(user1, '0', {
+        from: user1,
+      });
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 10); // 100% and no more
+    });
+
+    it('Returns total amount after 10d for 15d cliff', async function () {
+      const balanceBn = await this.multiVesting.getAvailableAmount(user2, '0', {
+        from: user2,
+      });
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 0); // 100% and no more
+    });
+
+    it('Returns total amount after 15d for 15d cliff', async function () {
+      await timeTravel(secondsInDay * 15);
+      const balanceBn = await this.multiVesting.getAvailableAmount(user2, '0', {
+        from: user2,
+      });
+      const balanceInEther = fromWei(balanceBn, 'milli') / 1000;
+      assert.strictEqual(balanceInEther, 11); // 100% and no more
     });
   });
 });
