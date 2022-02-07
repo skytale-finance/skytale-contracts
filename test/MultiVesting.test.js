@@ -3,6 +3,10 @@ const {
   timeTravel,
   currentBlockTime,
   getTimestamp,
+  takeSnapshot,
+  revertToSnapShot,
+  addDays,
+  advanceTime
 } = require('./helper/timeHelper');
 const w3 = require('web3');
 const { toWei, fromWei } = w3.utils;
@@ -487,19 +491,28 @@ contract('MultiVesting', function ([owner, user1, user2, user3, user4]) {
         { from: owner }
       );
 
+      const snapShot = await takeSnapshot();
+
+      snapshotId = snapShot['result'];
+
       {
         const currentTimestamp = await currentBlockTime();
-        const timestamp = await getTimestamp(currentTimestamp, 10);
+        const timestamp = await addDays(currentTimestamp, 10);
         const args = [user1, toWei('10', 'ether'), timestamp, 0, 0];
         await this.multiVesting.addVesting(...args, { from: owner });
       }
       {
         const currentTimestamp = await currentBlockTime();
-        const timestamp = await getTimestamp(currentTimestamp, 15);
+        const timestamp = await addDays(currentTimestamp, 15);
         const args = [user2, toWei('11', 'ether'), timestamp, toWei('5', 'ether'), 0];
         await this.multiVesting.addVesting(...args, { from: owner });
       }
     });
+
+    afterEach(async() => {
+      await revertToSnapShot(snapshotId);
+  });
+  
 
     it('Returns 0 after 1d for 10d cliff', async function () {
       await timeTravel(secondsInDay);
