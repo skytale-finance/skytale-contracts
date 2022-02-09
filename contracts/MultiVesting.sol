@@ -812,6 +812,7 @@ contract MultiVesting is Ownable
     event WithdrawUnallocatedFunds(address _receiver);
 
     struct Vesting {
+        uint256 offset;
         address beneficiary;
         uint256 startedAt; // Timestamp in seconds
         uint256 totalAmount; // Vested amount PMA in PMA
@@ -875,7 +876,10 @@ contract MultiVesting is Ownable
 
         require(available >= _amount, "DON_T_HAVE_ENOUGH_PMA");
 
-       Vesting memory v = Vesting({
+        uint256 offset = vestingHistory.length;
+
+        Vesting memory v = Vesting({
+            offset: offset,
             beneficiary: _beneficiary,
             startedAt : _startedAt,
             totalAmount : _amount,
@@ -905,8 +909,10 @@ contract MultiVesting is Ownable
             aggregatedAmount = aggregatedAmount.add(availableInSingleVesting);
 
             // Update released amount in specific vesting
-            vestingMap[msg.sender][vestingId].releasedAmount
-            = vestingMap[msg.sender][vestingId].releasedAmount.add(availableInSingleVesting);
+            uint256 releasedAmount = vestingMap[msg.sender][vestingId].releasedAmount.add(availableInSingleVesting);
+            uint256 offset = vestingMap[msg.sender][vestingId].offset;
+            vestingMap[msg.sender][vestingId].releasedAmount = releasedAmount;
+            vestingHistory[offset].releasedAmount = releasedAmount;
         }
 
         // Increase released amount
