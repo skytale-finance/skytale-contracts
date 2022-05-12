@@ -690,7 +690,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * by default, can be overridden in child contracts.
      */
     function _baseURI() internal view virtual returns (string memory) {
-        return "";
+        return "https://ipfs.io/ipfs/";
     }
 
     /**
@@ -1065,7 +1065,7 @@ abstract contract ERC721URIStorage is ERC721 {
         }
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
         if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI));
+            return string(abi.encodePacked(base, _tokenURI,"/metadata.json"));
         }
 
         return super.tokenURI(tokenId);
