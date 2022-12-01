@@ -1,7 +1,8 @@
 # SKYTALE SMART CONTRACTS
 
 ### INTRODUCTION
-The Skyatle Smart contracts has a Vesting and Token Contract .The tokens will be Locked For multiple wallet address according to the vesting cycle added by owner of contract .
+
+The Skytale Smart contracts has a Vesting and Token Contract .The tokens will be Locked For multiple wallet address according to the vesting cycle added by owner of contract .
 
 ### Constants
 - Unlock interval 30 days
@@ -9,7 +10,6 @@ The Skyatle Smart contracts has a Vesting and Token Contract .The tokens will be
 ### Deployment Needs
 - Token Contract 
 - Vesting Contract 
-
 
 ### VESTING CONTRACT ACTORS
 
@@ -63,3 +63,43 @@ ganache
 npm i
 npx  truffle test
 ```
+
+# NFT
+
+Contract for NFT token is `ClaimableNftDeployable.sol`
+
+## Deploy NFT
+
+1. create a folder `image` and put in it the `png` image for the NFT
+2. upload the folder to an IPFS service (i.e. NFT UP)
+3. create a folder `meta` and put in the following `metadata.json` file:
+
+```json
+{
+  "name": "<name_of_campaign>",
+  "description": "<description_of_campaign>",
+  "external_url": "https://skytale.finance",
+  "attributes": [
+    {
+      "trait_type": "event_id",
+      "value": "<event_id>"
+    }
+  ],
+  "image": "<image_ipfs>"
+}
+```
+
+4. paste the ipfs URI of the file in the form `ipfs://{ipfs_id}/{image.png}`
+5. upload the folder `meta` to an IPFS service (i.e. NFT UP)
+6. in the browser go to https://remix.ethereum.org
+7. connect remix to your local file system
+8. compile `ClaimableNftDeployable.sol` with compiler version 0.8.0
+9. deploy the contract on the desired protocol passing as parameters:
+   * name of the contract
+   * symbol of the contract
+   * event id
+   * baseURI as `https://ipfs.io/ipfs/` (do not forget the last `/`)
+10. verify the contract in the explorer of the selected network
+11. check all the contract metadata
+12. add one test user and mint the first token
+
