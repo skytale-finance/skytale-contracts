@@ -1685,12 +1685,21 @@ contract ClaimableNft is ERC721URIStorage, ERC721Enumerable, Ownable {
     function mintNFT(string memory uri) checkIsAllowedToMint public returns (uint256)
     {
         _tokenIds.increment();
-
         uint256 newItemId = _tokenIds.current();
         _safeMint(msg.sender, newItemId);
         _setTokenURI(newItemId, uri);
         usersMap[msg.sender] = false;
         return newItemId;
+    }
+
+    function mintToNFT(address[] memory _beneficiary, string memory uri) public {
+        for (uint256 i = 0; i < _beneficiary.length; i++) {
+            _tokenIds.increment();
+            uint256 newItemId = _tokenIds.current();
+            _safeMint(_beneficiary[i], newItemId);
+            _setTokenURI(newItemId, uri);
+            usersMap[msg.sender] = false;
+        }
     }
 
     function getTokenUri(address _owner) external view returns (uint[] memory) {
