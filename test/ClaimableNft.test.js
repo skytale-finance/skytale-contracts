@@ -7,7 +7,7 @@ const {
 const w3 = require("web3");
 const { toWei, fromWei } = w3.utils;
 
-const ClaimableNft = artifacts.require("./ClaimableNft");
+const ClaimableNft = artifacts.require("../contracts/ClaimableNft");
 const secondsInDay = 86400;
 const secondsIn30Days = secondsInDay * 30;
 
